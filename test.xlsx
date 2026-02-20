@@ -1,1 +1,27 @@
-
+Category	Specific Capability	Business / Technical Value
+1. Semantic & Discovery	Metadata Enrichment	Automatically writes "Wiki" descriptions for obscure Dremio table names.
+	Semantic Mapping	Maps "Gross Margin" to
+		(Revenue - COGS) / Revenue
+		without manual coding.
+	Data Discovery	"Find me any datasets related to ESG scores in the last 2 years."
+	PII Identification	Scans columns to flag sensitive data (GDPR/CCPA) before the user sees it.
+2. Query & Extraction	Natural Language to SQL	Handles complex JOINs, CTEs, and window functions across Dremio sources.
+	SQL Self-Healing	If a query fails due to a syntax error, the LLM fixes it and reruns it automatically.
+	Query Optimization	Suggests using Dremio Reflections to speed up a slow 10-billion-row query.
+	Cross-Source Joins	Logic to join a Postgres table with an S3 Parquet file via Dremio's lakehouse.
+3. Diagnostic (The "Why")	Anomaly Detection	Identifies outliers using Z-Score or Isolation Forest logic (see step-by-step below).
+	Root Cause Analysis	"I see sales dropped; I checked and found a correlation with regional weather data."
+	Drill-down Pathing	Suggests the next logical question (e.g., "Would you like to see this by Store ID?").
+	Contribution Analysis	Breaks down which segment (e.g., 'Mobile Users') contributed most to a trend.
+4. Predictive (The "Future")	Time-Series Forecasting	Projects future values (Revenue/Inventory) using RAG-fed historical data.
+	Scenario Modeling	"Show me the impact on churn if we increase subscription prices by 5%."
+	Propensity Scoring	Uses LLM to categorize customers into "Likely to Buy" vs "Likely to Churn."
+	Trend Soft-Labeling	Categorizes trends as "Seasonal," "One-off Spike," or "Structural Shift."
+5. Synthesis & Narrative	Executive Summarization	Turns a massive Dremio result set into 3 bullet points for a CEO.
+	Automated Data Storytelling	Generates a full narrative structure: Context $\rightarrow$ Insight $\rightarrow$ Recommendation.
+	Multimodal Viz	Generates the actual Python code (Plotly/Matplotlib) to render the data.
+	Comparative Insights	Automatically compares "This Month" vs "Last Month" without being asked.
+6. Agentic Operations	Active Alerting	"Message me on Slack if the 'Error Rate' exceeds 2% in Dremio logs."
+	Data Cleaning Bot	Identifies duplicate records or null values and suggests SQL to "clean" them.
+	Knowledge Retrieval (RAG)	Pulls info from PDF manuals or Slack threads to explain a data discrepancy.
+	API Integration	Can push data found in Dremio directly into a CRM like Salesforce or HubSpot.
