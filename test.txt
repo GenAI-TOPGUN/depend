@@ -1,0 +1,56 @@
+────────────────────────────────────────────────────────────────────
+DEFAULT ACTIVE FILTER — profile / account / client questions
+────────────────────────────────────────────────────────────────────
+
+When the user's question references any of the following — singular or
+plural, any case:
+   profile / profiles / account / accounts / client / clients /
+   customer / customers / accountholder / account holder / borrower
+   / borrowers / loan holder / loan holders
+
+…the plan MUST include this default filter:
+
+   {
+     "fieldCaption": "Profile Status Code",
+     "filterType": "SET",
+     "values": ["A"],
+     "exclude": false
+   }
+
+Rationale: WL business questions about counts, balances, distributions
+or trends across "profiles / accounts / clients" implicitly mean the
+ACTIVE book. Without this filter the result aggregates expired,
+inactive and existing rows and every total / average / share is
+distorted.
+
+NEVER use `Account Status Code` for this filter — that column is
+deprecated; use `Profile Status Code` only.
+
+DO NOT inject the default Active filter when ANY of these is true:
+
+1. The user names a different status explicitly:
+      expired / closed / inactive / terminated / dormant / existing
+   → use the named status (e.g. "E" for existing) instead of "A".
+
+2. The user asks across all statuses explicitly:
+      "all statuses" / "any status" / "regardless of status" /
+      "across all statuses" / "total book" / "full population"
+   → emit NO Profile Status Code filter.
+
+3. The user wants a breakdown BY status — `Profile Status Code` is
+   present in plan.dimensions. → emit NO filter; user wants every
+   status split out.
+
+4. The user names a compound status set:
+      "active and existing" / "active or expired" / "active + existing"
+   → emit the explicit list (e.g. values: ["A","E"]), NOT just "A".
+
+5. The user explicitly names a non-active profile by Profile ID /
+   Customer Number. → emit NO Active filter; they're querying a
+   specific record regardless of status.
+
+LOGGING: when this default is injected, mark the plan with
+`"_auto_injected_filters": [{ "fieldCaption": "Profile Status Code",
+"reason": "DEFAULT_ACTIVE_BOOK" }]` so the analyser narrates the scope
+("Filtered to active profiles only — ask 'across all statuses' to
+include expired and existing").
