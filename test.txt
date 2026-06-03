@@ -54,3 +54,84 @@ LOGGING: when this default is injected, mark the plan with
 "reason": "DEFAULT_ACTIVE_BOOK" }]` so the analyser narrates the scope
 ("Filtered to active profiles only — ask 'across all statuses' to
 include expired and existing").
+
+
+────────────────────────────────────────────────────────────────────
+DEFAULT FILTER FOR NON-COUNT METRICS — Active + Expired (still material)
+────────────────────────────────────────────────────────────────────
+
+When the user's question references profile / account / client (per
+the synonym list in Rule 1 above) AND the asked measure is NOT a
+profile count — i.e. the user wants a SUM / AVG / MIN / MAX / MEDIAN /
+share / distribution / trend of a BALANCE / EXPOSURE / OUTSTANDING /
+AMOUNT / LIMIT — the plan MUST replace Rule 1's "Active-only" default
+with this pair of filters:
+
+   filters: [
+     {
+       "fieldCaption": "Profile Status Code",
+       "filterType": "SET",
+       "values": ["A", "E"],
+       "exclude": false
+     },
+     {
+       "fieldCaption": "Outstanding Balance",         ← replace with
+       "filterType": "QUANTITATIVE_NUMERICAL",            this cube's
+       "quantitativeFilterType": "MIN",                   canonical
+       "min": 0,                                          OS-balance
+       "minInclusive": false                              field name
+     }
+   ]
+
+Rationale: Expired profiles can still carry a non-zero outstanding
+balance (loans not yet fully repaid) — they remain material to
+balance / exposure / risk metrics. Profile count uses Rule 1
+(Active-only); every other metric uses this rule.
+
+WHICH MEASURES ARE "COUNT" vs "NON-COUNT":
+
+  COUNT  (apply Rule 1 — Active-only):
+    intent = "count" / "how many" / "number of"
+    COUNTD(Profile ID), COUNT of profiles, number of clients,
+    any question whose answer is a count of profiles/accounts/clients.
+
+  NON-COUNT  (apply Rule 2 — A+E with OS > 0):
+    balance / outstanding / exposure / limit / amount / volume
+    SUM, AVG, MIN, MAX, MEDIAN of any non-count measure
+    distributions, shares, trends, comparisons of those measures.
+
+DO NOT inject Rule 2's filter when any of the Rule 1 overrides apply
+(user names a status explicitly / asks across all statuses / breaks
+down BY Profile Status Code / specifies a compound status set /
+queries a specific record by ID).
+
+LOGGING: when Rule 2 is injected, mark the plan with
+"_auto_injected_filters": [
+  { "fieldCaption": "Profile Status Code",
+    "reason": "DEFAULT_ACTIVE_PLUS_EXPIRED_FOR_NON_COUNT" },
+  { "fieldCaption": "Outstanding Balance",
+    "reason": "MATERIAL_BOOK_ONLY (OS > 0)" }
+]
+
+
+Use Case (analyser) Prompt
+
+────────────────────────────────────────────────────────────────────
+SCOPE NARRATION — mirror the default Active filters
+────────────────────────────────────────────────────────────────────
+
+When APPLIED FILTERS contains:
+
+  Profile Status Code = "A"  (only)
+    → narrate: "Active profiles only — ask 'across all statuses' to
+      include expired and existing."
+
+  Profile Status Code IN ("A", "E")  AND  Outstanding Balance > 0
+    → narrate: "Active and expired profiles with non-zero outstanding
+      balance (expired profiles included only when still material)."
+
+Do NOT omit this scope line — the reader needs to know that Rule 2
+deliberately includes expired-with-balance, and Rule 1 deliberately
+excludes them. If the user has overridden the default (status
+breakdown, explicit status, all-statuses, etc.), narrate the actual
+applied filters as usual.
